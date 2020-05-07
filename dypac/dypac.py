@@ -5,6 +5,8 @@
 import glob
 import itertools
 import warnings
+import argparse
+import load_confounds
 
 from scipy.sparse import vstack
 import numpy as np
@@ -520,3 +522,47 @@ class Dypac(BaseDecomposition):
         tseries = self.masker_.transform(img, confound)
         del img
         return self.masker_.inverse_transform(self.embedding.score(tseries))
+
+ if __name__ == "__main__":
+    f_list=[]
+    c_list=[]
+    subsample_size=20
+    n_clusters=20
+    n_states=50
+    n_batch=2
+    n_replications=30
+    smoothing_fwhm=5
+    threshold_sim=0.2
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--f1", help="filename", type=str)
+    parser.add_argument("--c1", help="confounds file", type=str)
+    parser.add_argument("--subsample_size", help="number of clusters", type=int)
+    parser.add_argument("--n_clusters", help="number of clusters", type=int)
+    parser.add_argument("--n_states", help="number of clusters", type=int)
+    parser.add_argument("--n_batch", help="number of clusters", type=int)
+    parser.add_argument("--n_replications", help="number of clusters", type=int)
+    parser.add_argument("--smoothing_fwhm", help="number of clusters", type=int)
+    parser.add_argument("--threshold_sim", help="number of clusters", type=int)
+    args = parser.parse_args()
+    if args.f1:
+        f_list.append(args.f1)
+    if args.c1:
+        c_list.append(load_confounds(args.c1))
+    if args.subsample_size:
+        subsample_size = args.subsample_size
+    if args.n_clusters:
+        n_clusters = args.n_clusters
+    if args.n_states:
+        n_states = args.n_states
+    if args.n_batch:
+        n_batch = args.n_batch
+    if args.n_replications:
+        n_replications = args.n_replications
+    if args.n_replications:
+        n_replications = args.n_replications
+    if args.threshold_sim:
+        threshold_sim = args.threshold_sim
+    dymodel = dypac(subsample_size=subsample_size, n_clusters=n_clusters, n_states=n_states,
+               n_batch=n_batch, n_replications=n_replications, smoothing_fwhm=smoothing_fwhm,
+               threshold_sim=threshold_sim)
+    dyfit = dymodel.fit(f_list, confounds=c_list)
